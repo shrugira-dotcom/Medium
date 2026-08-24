@@ -1,135 +1,192 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   medium.c                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: sradhakr <sradhakr@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/08/19 14:04:04 by sradhakr          #+#    #+#             */
-/*   Updated: 2026/08/20 15:41:31 by sradhakr         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+
 
 #include "push_swap.h"
 
-void	medium_algo(t_stack **a, t_stack **b, int argc)
+void	medium_algo(t_stack **a, t_stack **b, int n)
 {
-	t_info	c_info;
-	int		size;
-	int		remaining;
+	t_info	info;
 
-	heap_utils(a, argc);
-	size = ft_stack_size(*a);
-	c_info.k = root(size);
-	c_info.low = size - 1;
-	c_info.up = c_info.low - c_info.k + 1;
-	c_info.count = c_info.k;
-	while (c_info.up >= 0 && c_info.count != 0)
-		process_chunk(a, b, &c_info, size);
+	if (n <= 1)
+		return ;
+	heap_utils(a, n);
+	info.count = n;
+	info.k = chunk_count(n);
+	chunk_sort(a, b, &info);
 }
 
-void	process_chunk(t_stack **a, t_stack **b, t_info *c_info, int size)
+void	chunk_sort(t_stack **a, t_stack **b, t_info *info)
 {
-	int	pos;
+	t_a_state	st;
+	int			chunk;
+	int			base;
+	int			extra_chunks;
 
-	while (c_info->count != 0)
+	st.a = a;
+	st.size = info->count;
+	st.tail = find_tail(*a);
+	base = info->count / info->k;
+	extra_chunks = info->count % info->k;
+	info->low = 0;
+	chunk = 0;
+	while (chunk < info->k)
 	{
-		pos = find_chunk_pos(*a, c_info, size);
-		if (pos >= 0)
-		{
-			while (pos--)
-				ra(a);
-		}
-		else
-		{
-			while (pos++)
-				rra(a);
-		}
-		pb(a, b);
-		size--;
-		c_info->count--;
-		if (c_info->count == 0)
-		{
-			next_chunk(c_info, b, a);
-			size = ft_stack_size(*a);
-		}
+		info->ch_size = base + (chunk < extra_chunks);
+		info->up = info->low + info->ch_size;
+		process_chunk(&st, b, info);
+		info->low = info->up;
+		chunk++;
 	}
-}
-
-int	find_chunk_pos(t_stack *a, t_info *c_info, int size)
-{
-	t_stack	*temp;
-	int		pos;
-
-	temp = a;
-	pos = 0;
-	while (temp)
-	{
-		if (temp->index >= c_info->up
-			&& temp->index <= c_info->low)
-			break ;
-		pos++;
-		temp = temp->next;
-	}
-	if (pos <= size / 2)
-		return (pos);
-	return (pos - size);
-}
-
-void	next_chunk(t_info *c_info, t_stack **b, t_stack **a)
-{
-	c_info->up -= c_info->k;
-	c_info->low -= c_info->k;
-	c_info->count = c_info->k;
-
-	intermittent_bsort(b, a, c_info);
-	if (c_info->up < 0)
-	{
-		c_info->up = 0;
-		c_info->k = c_info->low + 1;
-		c_info->count = c_info->k;
-	}
-}
-
-void	intermittent_bsort(t_stack **b, t_stack **a, t_info *c_info)
-{
-	t_stack	*temp;
-	t_stack	*big;
-	int		i;
-	int		big_pos;
-
 	while (*b)
+		pa(b, a);
+}
+
+void	process_chunk(t_a_state *st, t_stack **b, t_info *info)
+{
+	int	remaining;
+
+	remaining = info->ch_size;
+	info->pos = 0;
+	while (remaining > 0)
 	{
-		temp = *b;
-		big = *b;
-		big_pos = 0;
-		i = 0;
-		while (i < c_info->k && temp->next)
-		{
-			if (big->index < temp->next->index)
-			{
-				big = temp->next;
-				big_pos = i + 1;
-			}
-			temp = temp->next;
-			i++;
-		}
-		sort_to_a(big_pos, i + 1, b, a);
+		move_one(st, b, info);
+		info->pos++;
+		remaining--;
+
 	}
 }
 
-void	sort_to_a(int pos, int size, t_stack **b, t_stack **a)
+void	move_one(t_a_state *st, t_stack **b, t_info *info)
 {
-	if (pos >= size / 2)
+	int	move_pos;
+	int	index;
+	int	depth;
+	int cost_a;
+	int	reverse_b;
+
+	if (!compute_dist(st, info, &move_pos, &index))
+		return ;
+	cost_a = move_pos;
+	if (st->size - move_pos < cost_a)
+		cost_a = st->size - move_pos;
+	depth = insertion_depth(*b, info->pos, index);
+	reverse_b = depth;
+	rotate_extraction(st, b, cost_a == move_pos, &cost_a, &depth);
+	while (depth-- > 0)
+		rb(b);
+	pb(st->a, b);
+	st->size--;
+	while (reverse_b-- > 0)
+		rrb(b);
+}
+
+int	compute_dist(t_a_state *st, t_info *info, int *res_pos, int *res_index)
+{
+	t_stack	*front;
+	t_stack	*back;
+	int		pos_f;
+	int		pos_b;
+
+	pos_b = 0;
+	front = scan_front(*st->a, info, &pos_f);
+	if (!front)
+		return (0);
+	back = scan_back(st->tail, info, &pos_b);
+	if (pos_b < pos_f)
 	{
-		pos = size - pos;
-		while (pos--)
-			rrb(b);
+		*res_pos = st->size - pos_b;
+		*res_index = back->index;
 	}
 	else
 	{
-		while (pos--)
-			rb(b);
+		*res_pos = pos_f;
+		*res_index = front->index;
 	}
-	pa(b, a);
+	return (1);
 }
+
+t_stack *scan_front(t_stack *head, t_info *info, int *pos_f)
+{
+    int i;
+
+    i = 0;
+    while (head)
+    {
+        if (head->index >= info->low && head->index < info->up)
+        {
+            *pos_f = i;
+            return (head);
+        }
+        i++;
+        head = head->next;
+    }
+    return (NULL);
+}
+
+t_stack *scan_back(t_stack *tail, t_info *info, int *pos_b)
+{
+    int i;
+
+    i = 1;
+    while (tail)
+    {
+        if (tail->index >= info->low && tail->index < info->up)
+        {
+            *pos_b = i;
+            return (tail);
+        }
+        i++;
+        tail = tail->prev;
+    }
+    return (NULL);
+}
+
+int	insertion_depth(t_stack *b, int placed, int index)
+{
+	int		d;
+	t_stack *node;
+
+	d = 0;
+	node = b;
+	while (node && placed-- > 0)
+	{
+	if (node->index < index)
+			break;
+		d++;
+	}
+	return (d);
+}
+
+
+void	rotate_extraction(t_a_state *st, t_stack **b, int forward, int *cost_a, int *depth)
+{
+	if (forward)
+		merge_forward(st, b, cost_a, depth);
+	else
+		while ((*cost_a)-- > 0)
+		{
+			st->tail = st->tail->prev;
+			rra(st->a);
+		}
+}
+
+void	merge_forward(t_a_state *st, t_stack **b, int *cost_a, int *depth)
+{
+	int	merged;
+
+	merged = *cost_a;
+	if (*depth < merged)
+		merged = *depth;
+	*cost_a -= merged;
+	*depth -= merged;
+	while (merged-- > 0)
+	{
+		st->tail = *st->a;
+		rr(st->a, b);
+	}
+	while ((*cost_a)-- > 0)
+	{
+		st->tail = *st->a;
+		ra(st->a);
+	}
+}
+

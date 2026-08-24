@@ -30,6 +30,15 @@ typedef struct s_info
 	int				k;
 }	t_info;
 
+
+typedef	struct s_a_state
+{
+	t_stack	**a;
+	t_stack	*tail;
+	int		size;
+}	t_a_state;
+
+
 //MAIN
 
 
@@ -75,12 +84,25 @@ void    simple_sort_to_b(int pos, int size, t_stack **a, t_stack **b);
 
 //MEDIUM ALGO
 
-void	medium_algo(t_stack **a, t_stack **b, int argc);
-void	process_chunk(t_stack **a, t_stack **b, t_info *c_info, int size);
-int		find_chunk_pos(t_stack *a, t_info *c_info, int size);
-void	next_chunk(t_info *c_info, t_stack **b, t_stack **a);
-void	intermittent_bsort(t_stack **b, t_stack **a, t_info *c_info);
-void    sort_to_a(int pos, int size, t_stack **b, t_stack **a);
+void	medium_algo(t_stack **a, t_stack **b, int n);
+void	chunk_sort(t_stack **a, t_stack **b, t_info *info);
+void	process_chunk(t_a_state *st, t_stack **b, t_info *info);
+void	move_one(t_a_state *st, t_stack **b, t_info *info);
+int		compute_dist(t_a_state *st, t_info *info, int *res_pos, int *res_index);
+void	merge_forward(t_a_state *st, t_stack **b, int *cost_a, int *q);
+void	rotate_extraction(t_a_state *st, t_stack **b, int forward, int *cost_a, int *q);
+int		insertion_depth(t_stack *b, int placed, int index);
+
+
+
+//MEDIUM UTILS
+
+int  	chunk_count(int n);
+t_stack *find_tail(t_stack *a);
+t_stack *scan_front(t_stack *head, t_info *info, int *pos_f);
+t_stack *scan_back(t_stack *tail, t_info *info, int *pos_b);
+
+
 
 //HEAP FUNCTIONS
 
