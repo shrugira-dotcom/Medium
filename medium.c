@@ -151,7 +151,8 @@ int	insertion_depth(t_stack *b, int placed, int index)
 	{
 	if (node->index < index)
 			break;
-		d++;
+	d++;
+	node = node->next;
 	}
 	return (d);
 }
