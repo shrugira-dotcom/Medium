@@ -38,6 +38,12 @@ typedef	struct s_a_state
 	int		size;
 }	t_a_state;
 
+typedef	struct s_rot
+{
+	int	cost_a;
+	int	depth;
+}	t_rot;
+
 
 //MAIN
 
@@ -89,8 +95,8 @@ void	chunk_sort(t_stack **a, t_stack **b, t_info *info);
 void	process_chunk(t_a_state *st, t_stack **b, t_info *info);
 void	move_one(t_a_state *st, t_stack **b, t_info *info);
 int		compute_dist(t_a_state *st, t_info *info, int *res_pos, int *res_index);
-void	merge_forward(t_a_state *st, t_stack **b, int *cost_a, int *q);
-void	rotate_extraction(t_a_state *st, t_stack **b, int forward, int *cost_a, int *q);
+void	merge_forward(t_a_state *st, t_stack **b, t_rot *r);
+void	rotate_extraction(t_a_state *st, t_stack **b, int forward, t_rot *r);
 int		insertion_depth(t_stack *b, int placed, int index);
 
 

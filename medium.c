@@ -57,21 +57,20 @@ void	process_chunk(t_a_state *st, t_stack **b, t_info *info)
 
 void	move_one(t_a_state *st, t_stack **b, t_info *info)
 {
-	int	move_pos;
-	int	index;
-	int	depth;
-	int cost_a;
-	int	reverse_b;
+	int		move_pos;
+	int		index;
+	int		reverse_b;
+	t_rot	r;
 
 	if (!compute_dist(st, info, &move_pos, &index))
 		return ;
-	cost_a = move_pos;
-	if (st->size - move_pos < cost_a)
-		cost_a = st->size - move_pos;
-	depth = insertion_depth(*b, info->pos, index);
-	reverse_b = depth;
-	rotate_extraction(st, b, cost_a == move_pos, &cost_a, &depth);
-	while (depth-- > 0)
+	r.cost_a = move_pos;
+	if (st->size - move_pos < r.cost_a)
+		r.cost_a = st->size - move_pos;
+	r.depth = insertion_depth(*b, info->pos, index);
+	reverse_b = r.depth;
+	rotate_extraction(st, b, r.cost_a == move_pos, &r);
+	while (r.depth-- > 0)
 		rb(b);
 	pb(st->a, b);
 	st->size--;
@@ -158,36 +157,54 @@ int	insertion_depth(t_stack *b, int placed, int index)
 }
 
 
-void	rotate_extraction(t_a_state *st, t_stack **b, int forward, int *cost_a, int *depth)
+void	rotate_extraction(t_a_state *st, t_stack **b, int forward, t_rot *r)
 {
 	if (forward)
-		merge_forward(st, b, cost_a, depth);
+		merge_forward(st, b, r);
 	else
-		while ((*cost_a)-- > 0)
+		while ((r->cost_a)-- > 0)
 		{
 			st->tail = st->tail->prev;
 			rra(st->a);
 		}
 }
 
-void	merge_forward(t_a_state *st, t_stack **b, int *cost_a, int *depth)
+void	merge_forward(t_a_state *st, t_stack **b, t_rot *r)
 {
 	int	merged;
 
-	merged = *cost_a;
-	if (*depth < merged)
-		merged = *depth;
-	*cost_a -= merged;
-	*depth -= merged;
+	merged = r->cost_a;
+	if (r->depth < merged)
+		merged = r->depth;
+	r->cost_a -= merged;
+	r->depth -= merged;
 	while (merged-- > 0)
 	{
 		st->tail = *st->a;
 		rr(st->a, b);
 	}
-	while ((*cost_a)-- > 0)
+	while ((r->cost_a)-- > 0)
 	{
 		st->tail = *st->a;
 		ra(st->a);
 	}
 }
 
+
+int  chunk_count(int n)
+{
+    int x;
+
+    x = 0;
+    while ((x + 1) * (x + 1) <= n)
+        x++;
+    return ((x * 116 + 50) / 100);
+}
+t_stack *find_tail(t_stack *a)
+{
+    if (!a)
+        return (NULL);
+    while (a->next)
+        a = a->next;
+    return (a);
+}

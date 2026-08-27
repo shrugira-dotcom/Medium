@@ -117,7 +117,7 @@ For each algorithm: name it, explain the technique, and justify the complexity c
 in terms of number of push_swap operations generated (not classical array complexity).
 -->
 
-### 1. Simple — O(n²)
+### 1. Simple
 
 **Technique used:**
 
@@ -143,28 +143,40 @@ O(n) × O(n) = O(n²)
 
 ---
 
-### 2. Medium — O(n√n)
+### 2. Medium
 
 **Technique used:** 
 
-The algorithm uses a chunk-based sorting technique. The heap sort is used to assign index to each element. The stack a is then divided into chunks of approximately √n elements. Elements belonging to the current chunk are pushed from a to b. Once a chunk has been transferred, b is partially sorted by repeatedly finding the largest indexed element in the current chunk and moving it back to a with the minimum number of rotations.
+The algorithm uses an optimized chunk-based sorting technique. First, heap sort is used to assign a sorted index to every element. The stack is then divided into approximately √n chunks using chunk_count().
+
+Unlike a basic chunk algorithm, this version searches for valid elements from both the top and bottom of stack a and selects the one requiring the fewest rotations. While transferring elements to stack b, it also calculates the best insertion depth to maintain a partially sorted order. When possible, simultaneous rotations with rr are used to reduce the total number of operations.
 
 **How it works:**
 
-1. The stack is divided into chunks of approximately √n elements for inputs up to 20, and 2.65 * √n for larger inputs.
-2. low and up define the range of indexes belonging to the current chunk.
-3. find_chunk_pos() finds an element from the current chunk in stack a.
-4. The position of that element is compared with the middle of stack a.
-    - If it is in the upper half, ra is used to rotate it towards the top.
-    - If it is in the lower half, rra is used instead.
-5. pb moves the element from a to b.
-6. Once a chunk is moved, intermittent_bsort() searches the largest index and uses rb or rrb to bring that element to the top.
-7. pa moves the largest element back to a. Repeating this places the elements from the chunk back into a in descending order.
-8. next_chunk() updates up and low to select the next range of indexes and repeats the process until all elements have been processed.
+1. medium_algo() first checks whether sorting is necessary. If there is more than one element, heap_utils() assigns a sorted index to each element.
+2. chunk_count() calculates the number of chunks based on approximately √n:
+    - It first finds the integer square root of n then multiplied by approximately 1.16 to determine the number of chunks.
+3. chunk_sort() divides the total number of elements into chunks.
+    - base determines the minimum number of elements per chunk.
+    - extra_chunks distributes any remaining elements among the first chunks.
+    - low and up define the index range of the current chunk.
+4. process_chunk() repeatedly moves elements belonging to the current chunk from stack a to stack b.
+5. compute_dist() searches for a valid element from both directions:
+    - scan_front() searches from the top of stack a.
+    - scan_back() searches from the bottom using the stored tail pointer.
+    - The algorithm compares both positions and selects the element requiring the fewest rotations.
+6. move_one() calculates the rotation cost for stack a and determines where the selected element should be inserted into stack b.
+7. insertion_depth() finds the appropriate position in b by comparing the selected element's index with the elements already placed in the current chunk.
+8. rotate_extraction() moves the selected element to the top of stack a.
+    - If rotating forward is cheaper, ra is used.
+    - If rotating backward is cheaper, rra is used.
+9. When both stacks need forward rotations, merge_forward() combines them using rr. This performs rotations on both stacks simultaneously and reduces the total number of operations.
+10. The element is moved from a to b using pb. Stack b is then restored with rrb rotations so that its partial ordering is preserved.
+11. Once all chunks have been processed, stack b contains the elements in the required order, allowing pa to repeatedly move every element back to stack a.
 
 **Complexity justification:**
 
-The algorithm processes the elements in chunks of approximately √n elements. For each chunk, it may need to search and rotate the stacks to move the elements into the correct position. There are approximately √n chunks, and processing each chunk can require up to O(n) operations.
+The algorithm processes the elements in chunks of approximately √n elements. For each chunk, it searches stack a (from both ends) to find each element belonging to that chunk, rotates it to the top, then moves it onto stack b in its correct position. There are approximately √n chunks, and moving all the elements within one chunk can require uo to O(n) operations in total.
 
 Therefore:
 O(n)×O(√n) = O(n√n)
@@ -219,7 +231,7 @@ O(n)×O(√n) = O(n√n)
 ### AI usage disclosure
 
 AI was used through out the project to understand different algorithm, complexity calculation, debugging and to structure Readme file.
-The derivation of constant (c ~ 2.65) used in Medium algorithm was derived with the help of AI assistant Claude (Anthropic).
+
 ---
 
 ## Contributors
