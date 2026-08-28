@@ -90,13 +90,13 @@ void    simple_sort_to_b(int pos, int size, t_stack **a, t_stack **b);
 
 //MEDIUM ALGO
 
-void	medium_algo(t_stack **a, t_stack **b, int n);
-void	chunk_sort(t_stack **a, t_stack **b, t_info *info);
-void	process_chunk(t_a_state *st, t_stack **b, t_info *info);
-void	move_one(t_a_state *st, t_stack **b, t_info *info);
+void	medium_algo(t_stack **a, t_stack **b, int n, int count);
+void	chunk_sort(t_stack **a, t_stack **b, t_info *info, int count);
+void	process_chunk(t_a_state *st, t_stack **b, t_info *info, int count);
+void	move_one(t_a_state *st, t_stack **b, t_info *info, int count);
 int		compute_dist(t_a_state *st, t_info *info, int *res_pos, int *res_index);
-void	merge_forward(t_a_state *st, t_stack **b, t_rot *r);
-void	rotate_extraction(t_a_state *st, t_stack **b, int forward, t_rot *r);
+void	merge_forward(t_a_state *st, t_stack **b, t_rot *r, int count);
+void	rotate_extraction(t_a_state *st, t_stack **b, int forward, t_rot *r, int count);
 int		insertion_depth(t_stack *b, int placed, int index);
 
 

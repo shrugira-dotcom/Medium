@@ -9,12 +9,7 @@ Push_swap is an algorithmic project that requires sorting a stack of integers us
 
 The program takes a list of integers as arguments, loads them into stack `a`, and outputs to stdout the smallest sequence of instructions (`sa`, `sb`, `ss`, `pa`, `pb`, `ra`, `rb`, `rr`, `rra`, `rrb`, `rrr`) needed to sort them in ascending order.
 
-This implementation goes beyond a single sorting strategy: it implements **four distinct algorithms** of increasing complexity class — O(n²), O(n√n), O(n log n), and an adaptive strategy that selects between them based on a measured *disorder* score of the input.
-
-<!--
-TODO: Add 2-3 sentences here summarizing what makes your specific implementation notable
-(e.g. "Our adaptive strategy uses X technique for low disorder and Y for high disorder...")
--->
+It implements **four distinct algorithms** of increasing complexity class — O(n²), O(n√n), O(n log n), and an adaptive strategy that selects between them based on a measured *disorder* score of the input.
 
 ---
 
@@ -29,16 +24,6 @@ make
 ```
 
 This produces a `push_swap` executable at the root of the project.
-
-<!-- TODO: confirm/adjust if your Makefile structure differs -->
-
-### Compiling the bonus (checker)
-
-```bash
-make bonus
-```
-
-This produces a `checker` executable.
 
 ### Cleaning
 
@@ -110,12 +95,6 @@ Error
 ---
 
 ## Algorithms
-
-<!--
-TODO: This section is REQUIRED by the subject — fill in once implemented.
-For each algorithm: name it, explain the technique, and justify the complexity claim
-in terms of number of push_swap operations generated (not classical array complexity).
--->
 
 ### 1. Simple
 
