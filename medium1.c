@@ -2,7 +2,7 @@
 
 #include "push_swap.h"
 
-void	medium_algo(t_stack **a, t_stack **b, int n, int count)
+void	medium_algo(t_stack **a, t_stack **b, int n, int *count)
 {
 	t_info	info;
 
@@ -14,7 +14,7 @@ void	medium_algo(t_stack **a, t_stack **b, int n, int count)
 	chunk_sort(a, b, &info, count);
 }
 
-void	chunk_sort(t_stack **a, t_stack **b, t_info *info, int count)
+void	chunk_sort(t_stack **a, t_stack **b, t_info *info, int *count)
 {
 	t_a_state	st;
 	int			chunk;
@@ -40,7 +40,7 @@ void	chunk_sort(t_stack **a, t_stack **b, t_info *info, int count)
 		pa(b, a, count);
 }
 
-void	process_chunk(t_a_state *st, t_stack **b, t_info *info, int count)
+void	process_chunk(t_a_state *st, t_stack **b, t_info *info, int *count)
 {
 	int	remaining;
 
@@ -55,7 +55,7 @@ void	process_chunk(t_a_state *st, t_stack **b, t_info *info, int count)
 	}
 }
 
-void	move_one(t_a_state *st, t_stack **b, t_info *info, int count)
+void	move_one(t_a_state *st, t_stack **b, t_info *info, int *count)
 {
 	int		move_pos;
 	int		index;
@@ -72,7 +72,7 @@ void	move_one(t_a_state *st, t_stack **b, t_info *info, int count)
 	rotate_extraction(st, b, r.cost_a == move_pos, &r, count);
 	while (r.depth-- > 0)
 		rb(b, count);
-	pb(st->a, b);
+	pb(st->a, b, count);
 	st->size--;
 	while (reverse_b-- > 0)
 		rrb(b, count);
@@ -102,5 +102,3 @@ int	compute_dist(t_a_state *st, t_info *info, int *res_pos, int *res_index)
 	}
 	return (1);
 }
-
-

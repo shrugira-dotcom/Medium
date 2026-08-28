@@ -6,26 +6,11 @@
 /*   By: sradhakr <sradhakr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/19 13:53:26 by sradhakr          #+#    #+#             */
-/*   Updated: 2026/08/19 13:58:43 by sradhakr         ###   ########.fr       */
+/*   Updated: 2026/08/28 17:57:01 by sradhakr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
-
-void	ft_simple_algo(t_stack **a, t_stack **b)
-{
-	int     size;
-	int     pos;
-
-	while (*a)
-	{
-	size = ft_stack_size(*a);
-	pos = find_min_pos(*a);
-	simple_sort_to_b(pos, size, a, b);
-	}
-	while (*b)
-		pa(b, a);
-}
 
 int ft_stack_size(t_stack *ab)
 {
@@ -39,8 +24,7 @@ int ft_stack_size(t_stack *ab)
 	}
 	return (count);
 }
-
-int	find_min_pos(t_stack *a)
+int find_min_pos(t_stack *a)
 {
 	t_stack     *temp;
 	int         min;
@@ -64,25 +48,40 @@ int	find_min_pos(t_stack *a)
 	return (pos);
 }
 
-void	simple_sort_to_b(int pos, int size, t_stack **a, t_stack **b)
+void    simple_sort_to_b(int pos, int size, t_stack **a, t_stack **b, int *counts)
 {
-	if (pos >= size / 2)
+	if (pos >= size/2)
 	{
 		pos = size - pos;
 		while (pos)
 		{
-			rra(a);
+			rra(a, counts);
 			pos--;
 		}
-		pb(a, b);
+		pb(a, b, counts);
 	}
 	else
 	{
 		while (pos)
 		{
-			ra(a);
+			ra(a, counts);
 			pos--;
 		}
-		pb(a, b);
+		pb(a, b, counts);
 	}
+}
+
+void    ft_simple_algo(t_stack **a, t_stack **b, int *counts)
+{
+	int     size;
+	int     pos;
+
+	while (*a)
+	{
+	size = ft_stack_size(*a);
+	pos = find_min_pos(*a);
+	simple_sort_to_b(pos, size, a, b, counts);
+	}
+	while (*b)
+		pa(b, a, counts);
 }

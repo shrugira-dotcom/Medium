@@ -6,7 +6,7 @@
 /*   By: sradhakr <sradhakr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/19 15:05:20 by sradhakr          #+#    #+#             */
-/*   Updated: 2026/08/19 15:05:30 by sradhakr         ###   ########.fr       */
+/*   Updated: 2026/08/28 15:49:39 by sradhakr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,21 +32,24 @@ void    ft_reverse_rotate(t_stack **a)
     *a = last;
 }
 
-void    rra(t_stack **a)
+void    rra(t_stack **a, int *counts)
 {
     ft_reverse_rotate(a);
+    counts[RRA]++;
     write(1, "rra\n", 4);
 }
 
-void    rrb(t_stack **b)
+void    rrb(t_stack **b, int *counts)
 {
     ft_reverse_rotate(b);
+    counts[RRB]++;
     write(1, "rrb\n", 4);
 }
 
-void    rrr(t_stack **a, t_stack **b)
+void    rrr(t_stack **a, t_stack **b, int *counts)
 {
     ft_reverse_rotate(a);
     ft_reverse_rotate(b);
+    counts[RRR]++;
     write(1, "rrr\n", 4);
 }
