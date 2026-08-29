@@ -103,7 +103,7 @@ void ft_print_index(t_stack *stack); // TO REMOVE
 void    ft_simple_algo(t_stack **a, t_stack **b, int *counts);
 int		ft_stack_size(t_stack *ab);
 int		find_min_pos(t_stack *a);
-void    simple_sort_to_b(int pos, int size, t_stack **a, t_stack **b, int *counts);
+void    simple_sort_to_b(int steps, t_stack **a, t_stack **b, int *counts);
 
 //MEDIUM1
 
