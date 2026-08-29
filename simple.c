@@ -48,39 +48,36 @@ int find_min_pos(t_stack *a)
 	return (pos);
 }
 
-void    simple_sort_to_b(int pos, int size, t_stack **a, t_stack **b, int *counts)
+void    simple_sort_to_b(int steps, t_stack **a, t_stack **b, int *counts)
 {
-	if (pos >= size/2)
+	if (steps >= 0)
 	{
-		pos = size - pos;
-		while (pos)
-		{
-			rra(a, counts);
-			pos--;
-		}
-		pb(a, b, counts);
+		while (steps--)
+			ra(a, counts);
 	}
 	else
 	{
-		while (pos)
-		{
-			ra(a, counts);
-			pos--;
-		}
-		pb(a, b, counts);
+		while (steps++)
+			rra(a, counts);
 	}
+	pb(a, b, counts);
 }
 
 void    ft_simple_algo(t_stack **a, t_stack **b, int *counts)
 {
 	int     size;
 	int     pos;
-
+	int		steps;
+	
 	while (*a)
 	{
 	size = ft_stack_size(*a);
 	pos = find_min_pos(*a);
-	simple_sort_to_b(pos, size, a, b, counts);
+	if (pos >= size / 2)
+		steps = pos - size;
+	else
+		steps = pos;
+	simple_sort_to_b(steps, a, b, counts);
 	}
 	while (*b)
 		pa(b, a, counts);
