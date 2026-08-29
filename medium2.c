@@ -55,9 +55,9 @@ int	insertion_depth(t_stack *b, int placed, int index)
 }
 
 
-void	rotate_extraction(t_a_state *st, t_stack **b, int forward, t_rot *r, int *count)
+void	rotate_extraction(t_a_state *st, t_stack **b, t_rot *r, int *count)
 {
-	if (forward)
+	if (r->forward)
 		merge_forward(st, b, r, count);
 	else
 		while ((r->cost_a)-- > 0)
