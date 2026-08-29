@@ -69,7 +69,8 @@ void	move_one(t_a_state *st, t_stack **b, t_info *info, int *count)
 		r.cost_a = st->size - move_pos;
 	r.depth = insertion_depth(*b, info->pos, index);
 	reverse_b = r.depth;
-	rotate_extraction(st, b, r.cost_a == move_pos, &r, count);
+	r.forward = (r.cost_a == pos);
+	rotate_extraction(st, b, &r, count);
 	while (r.depth-- > 0)
 		rb(b, count);
 	pb(st->a, b, count);
