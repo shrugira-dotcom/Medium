@@ -42,6 +42,7 @@ typedef	struct s_rot
 {
 	int	cost_a;
 	int	depth;
+	int	forward;
 }	t_rot;
 
 typedef enum e_op
@@ -117,7 +118,7 @@ int		compute_dist(t_a_state *st, t_info *info, int *res_pos, int *res_index);
 t_stack *scan_front(t_stack *head, t_info *info, int *pos_f);
 t_stack *scan_back(t_stack *tail, t_info *info, int *pos_b);
 int	insertion_depth(t_stack *b, int placed, int index);
-void	rotate_extraction(t_a_state *st, t_stack **b, int forward, t_rot *r, int *count);
+void	rotate_extraction(t_a_state *st, t_stack **b, t_rot *r, int *count);
 void	merge_forward(t_a_state *st, t_stack **b, t_rot *r, int *count);
 
 //MEDIUM UTILS
