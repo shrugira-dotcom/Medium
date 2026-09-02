@@ -68,10 +68,10 @@ void    ft_simple_algo(t_stack **a, t_stack **b, int *counts)
 	int     size;
 	int     pos;
 	int		steps;
-	
+
+	size = ft_stack_size(*a);
 	while (*a)
 	{
-	size = ft_stack_size(*a);
 	pos = find_min_pos(*a);
 	if (pos >= size / 2)
 		steps = pos - size;
@@ -81,4 +81,5 @@ void    ft_simple_algo(t_stack **a, t_stack **b, int *counts)
 	}
 	while (*b)
 		pa(b, a, counts);
+	size--;
 }
