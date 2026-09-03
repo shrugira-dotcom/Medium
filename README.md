@@ -39,14 +39,6 @@ make re      # fclean + recompile
 ./push_swap [STRATEGY] <list of integers>
 ```
 
-**Strategy flags (optional):**
-
-| Flag | Forces |
-|------|--------|
-| `--simple` | O(n²) algorithm |
-| `--medium` | O(n√n) algorithm |
-| `--complex` | O(n log n) algorithm |
-| `--adaptive` | Adaptive strategy (default if no flag given) |
 
 **Benchmark mode:**
 
@@ -59,29 +51,20 @@ Prints sorting statistics to stderr: disorder %, strategy used, total operation 
 ### Examples
 
 ```bash
-$> ./push_swap 2 1 3 6 5 8
+$> ./push_swap --bench 2 1 3 6 8
 ra
 pb
 rra
 pb
-pb
-ra
-pb
-ra
-pb
-pb
 pa
 pa
-pa
-pa
-pa
-pa
-
-$> ARG="4 67 3 87 23"; ./push_swap --complex $ARG | ./checker $ARG
-OK
+[bench] disorder:  10.00%
+[bench] strategy:  Small / O(1)
+[bench] total_ops: 6
+[bench] sa: 0  sb: 0  ss: 0  pa: 2  pb: 2
+[bench] ra: 1  rb: 0  rr: 0  rra: 1  rrb: 0  rrr: 0
 ```
 
-<!-- TODO: replace/add real examples from your own program once tested -->
 
 ### Error handling
 
@@ -132,26 +115,13 @@ Unlike a basic chunk algorithm, this version searches for valid elements from bo
 
 **How it works:**
 
-1. medium_algo() first checks whether sorting is necessary. If there is more than one element, heap_utils() assigns a sorted index to each element.
-2. chunk_count() calculates the number of chunks based on approximately √n:
-    - It first finds the integer square root of n then multiplied by approximately 1.16 to determine the number of chunks.
-3. chunk_sort() divides the total number of elements into chunks.
-    - base determines the minimum number of elements per chunk.
-    - extra_chunks distributes any remaining elements among the first chunks.
-    - low and up define the index range of the current chunk.
-4. process_chunk() repeatedly moves elements belonging to the current chunk from stack a to stack b.
-5. compute_dist() searches for a valid element from both directions:
-    - scan_front() searches from the top of stack a.
-    - scan_back() searches from the bottom using the stored tail pointer.
-    - The algorithm compares both positions and selects the element requiring the fewest rotations.
-6. move_one() calculates the rotation cost for stack a and determines where the selected element should be inserted into stack b.
-7. insertion_depth() finds the appropriate position in b by comparing the selected element's index with the elements already placed in the current chunk.
-8. rotate_extraction() moves the selected element to the top of stack a.
-    - If rotating forward is cheaper, ra is used.
-    - If rotating backward is cheaper, rra is used.
-9. When both stacks need forward rotations, merge_forward() combines them using rr. This performs rotations on both stacks simultaneously and reduces the total number of operations.
-10. The element is moved from a to b using pb. Stack b is then restored with rrb rotations so that its partial ordering is preserved.
-11. Once all chunks have been processed, stack b contains the elements in the required order, allowing pa to repeatedly move every element back to stack a.
+1. Each element in a is assigned a sorted index (heap_utils()), and the number of chunks is set to about √n (chunk_count()).
+2. chunk_sort() splits the elements into chunks with defined index ranges, distributing any leftovers across the first few chunks.
+3. For each chunk, process_chunk() repeatedly finds the next valid element to move:
+	- compute_dist() scans from both the top and bottom of a to find the cheapest valid element to extract.
+	- rotate_extraction() brings it to the top of a using ra or rra, whichever is cheaper — using rr for simultaneous rotation when both stacks need to rotate forward.
+4. insertion_depth() finds where the element belongs in b (relative to already-placed elements), and pb + rrb move it there while keeping b's partial order intact.
+5. Once every chunk is processed, b holds all elements in order, so pa moves them back into a, fully sorted.
 
 **Complexity justification:**
 
@@ -164,40 +134,46 @@ O(n)×O(√n) = O(n√n)
 
 ### 3. Complex — O(n log n)
 
-**Technique used:** <!-- e.g. radix sort (LSD) -->
+**Technique used:** 
 
-**How it works:** <!-- TODO -->
+This algorithm uses a quicksort like technique. It picks a pivot value (the median of the current stack), partitions the stack around that pivot by splitting elements between stack a and stack b, and recursively repeats this on each partition until everything is sorted.
 
-**Complexity justification:** <!-- TODO -->
+**How it works:** 
+
+1. get_pivot() copies the current segment of values into an array, sorts a copy of it with pivot_loop() (insertion sort), and returns the middle (median) value to use as the pivot.
+2. quick_sort_a() partitions stack a using loop_a(): values smaller than the pivot are pushed to b, values larger stay in a and are rotated with ra. After the pass, rra restores the larger elements to their original relative order.
+3. This leaves b holding the "smaller" partition and a holding the "bigger" partition (already rotated back in place).
+4. quick_sort_a() then recurses on the bigger partition left in a, and calls quick_sort_b() on the smaller partition sitting in b.
+5. quick_sort_b() does the mirrored job on stack b using loop_b(): values bigger than the pivot are pushed back to a, values smaller stay in b and are rotated with rb, then rrb restores order.
+6. Base cases (size 0, 1, or 2) are handled directly with sa/sb or simple pa/pb moves instead of recursing further.
+7. Recursion keeps halving each side (approximately) until every partition is fully sorted back into a.
+
+**Complexity justification:** 
+
+Each partitioning pass (loop_a/loop_b) touches every element in that segment once, so it costs O(n) for a segment of size n. Because the pivot is chosen as the median, each partition splits the stack roughly in half, giving log(n) levels of recursion.
+
+Therefore:
+O(n) × O(log n) = O(n log n)
 
 ---
 
 ### 4. Adaptive (custom)
 
-**Disorder metric:** Calculated as the ratio of "mistakes" (pairs where a larger number precedes a smaller one) to total possible pairs, measured before any operations.
+**Disorder metric:** 
+
+This algorithm doesn't sort directly — it first measures how "disordered" stack a is, then picks whichever sorting algorithm (simple, medium, or quicksort) best fits that level of disorder.
 
 **Thresholds and rationale:**
 
-| Disorder range | Strategy used | Why |
-|---|---|---|
-| < 0.2 | Simple (O(n²)) | <!-- TODO: justify --> |
-| 0.2 – 0.5 | Medium (O(n√n)) | <!-- TODO: justify --> |
-| ≥ 0.5 | Complex (O(n log n)) | <!-- TODO: justify --> |
+1. ft_disorder() counts the number of "inversions" (pairs where a smaller value appears after a larger one) and divides by the total possible pairs, giving a disorder score between 0.0 (already sorted) and 1.0 (fully reversed/random).
+2. ft_adaptive() checks this score:
+	- If it's 0.0, the stack is already sorted, nothing to do.
+	- If it's below 0.2 (mostly sorted), it uses ft_simple_algo() (the O(n²) selection-based approach), since few elements are out of place.
+	- If it's between 0.2 and 0.5 (moderately disordered), it uses medium_algo() (the chunk-based O(n√n) approach).
+	- If it's 0.5 or higher (heavily disordered), it uses quick_sort_a() (the O(n log n) approach), since it scales best for messy input.
+4. counts[11] records which strategy was chosen (1 = simple, 2 = medium, 3 = quicksort).
 
-**Complexity argument (time & space, within the Push_swap operation model):** <!-- TODO -->
 
----
-
-## Performance
-
-<!-- TODO: fill in actual benchmark results -->
-
-| Input size | Operations used | Target (pass / good / excellent) |
-|---|---|---|
-| 100 random numbers | TBD | < 2000 / < 1500 / < 700 |
-| 500 random numbers | TBD | < 12000 / < 8000 / < 5500 |
-
----
 
 ## Resources
 
@@ -206,7 +182,7 @@ O(n)×O(√n) = O(n√n)
 - [Visualgo - sorting algorithm animations](https://visualgo.net/en/sorting)
 - [Abdul Bari - Youtube Tutorial](https://www.youtube.com/@abdul_bari)
 - [Bro Code - Youtube Tutorial](https://www.youtube.com/@BroCodez)
-- 
+
 ### AI usage disclosure
 
 AI was used through out the project to understand different algorithm, complexity calculation, debugging and to structure Readme file.
@@ -219,4 +195,3 @@ AI was used through out the project to understand different algorithm, complexit
 |---|---|
 | booz | parsing, complex/adaptive algorithms, checker, Makefile|
 | sradhakr | stack operations, simple/medium algorithms|
-
